@@ -12,25 +12,24 @@ import type { NavItem } from '@/types';
 import {
   LayoutDashboard,
   Map,
-  Users,
   UserCircle,
   Settings,
   LogOut,
   ShieldCheck,
   Gamepad2,
   Home,
-  Users2, // Added for Friends
-  MessageSquare, // Added for Chat
-  DoorOpen, // Placeholder for Rooms
+  Users2, 
+  MessageSquare, 
+  DoorOpen, 
 } from 'lucide-react';
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresAuth: true },
   { href: '/maps', label: 'Maps', icon: Map, requiresAuth: true },
   { href: '/spaces', label: 'Spaces', icon: Gamepad2, requiresAuth: true },
-  // { href: '/rooms', label: 'Active Rooms', icon: DoorOpen, requiresAuth: true }, // Will add in next step
   { href: '/friends', label: 'Friends', icon: Users2, requiresAuth: true },
   { href: '/chat', label: 'Chat', icon: MessageSquare, requiresAuth: true },
+  { href: '/rooms', label: 'Active Rooms', icon: DoorOpen, requiresAuth: true },
   { href: '/profile', label: 'Profile', icon: UserCircle, requiresAuth: true },
   { href: '/admin', label: 'Admin Panel', icon: ShieldCheck, adminOnly: true, requiresAuth: true },
 ];
@@ -41,12 +40,15 @@ export default function AppSidebar() {
   const { user, logout } = useAuth();
 
   const filteredNavItems = navItems.filter(item => {
-    if (!item.requiresAuth && user) return false; // Hide if logged in for items like login/signup
-    if (item.requiresAuth && !user) return false; // Hide if not logged in for protected items
+    if (!item.requiresAuth && user) return false; 
+    if (item.requiresAuth && !user) return false; 
     if (item.adminOnly && user?.role !== 'admin') {
       return false;
     }
     return true;
+  }).sort((a, b) => { // Custom sort to place 'Active Rooms' after 'Chat'
+    const order = ['/dashboard', '/maps', '/spaces', '/friends', '/chat', '/rooms', '/profile', '/admin'];
+    return order.indexOf(a.href) - order.indexOf(b.href);
   });
 
   return (
@@ -61,7 +63,7 @@ export default function AppSidebar() {
               <a
                 className={cn(
                   'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                  pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard')
+                  pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard' && item.href !== '/')
                     ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                     : 'text-sidebar-foreground'
                 )}

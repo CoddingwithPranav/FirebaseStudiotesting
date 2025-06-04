@@ -15,9 +15,9 @@ const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresAuth: true },
   { href: '/maps', label: 'Maps', icon: Map, requiresAuth: true },
   { href: '/spaces', label: 'Spaces', icon: Gamepad2, requiresAuth: true },
-  // { href: '/rooms', label: 'Active Rooms', icon: DoorOpen, requiresAuth: true }, // Will add in next step
   { href: '/friends', label: 'Friends', icon: Users2, requiresAuth: true },
   { href: '/chat', label: 'Chat', icon: MessageSquare, requiresAuth: true },
+  { href: '/rooms', label: 'Active Rooms', icon: DoorOpen, requiresAuth: true },
   { href: '/profile', label: 'Profile', icon: UserCircle, requiresAuth: true },
   { href: '/admin', label: 'Admin Panel', icon: ShieldCheck, adminOnly: true, requiresAuth: true },
 ];
@@ -34,16 +34,18 @@ export default function AppHeader() {
       return false;
     }
     return true;
+  }).sort((a, b) => { // Custom sort to place 'Active Rooms' after 'Chat'
+    const order = ['/dashboard', '/maps', '/spaces', '/friends', '/chat', '/rooms', '/profile', '/admin'];
+    return order.indexOf(a.href) - order.indexOf(b.href);
   });
   
   const getPageTitle = () => {
-    const currentNavItem = navItems.find(item => pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard' ));
+    const currentNavItem = navItems.find(item => pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard' && item.href !== '/'));
     if (currentNavItem) return currentNavItem.label;
-    // Fallback for dynamic routes like /arena/[spaceId]
+    
     if (pathname.startsWith('/arena/')) return 'Arena';
-    if (pathname.startsWith('/maps/')) return 'Map Details'; // Assuming map details page might exist
+    if (pathname.startsWith('/maps/')) return 'Map Details'; 
 
-    // Default or more complex logic for other paths
     const pathParts = pathname.split('/').filter(Boolean);
     const lastPart = pathParts.pop()?.replace('-', ' ');
     return lastPart ? lastPart.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Page';
@@ -69,7 +71,8 @@ export default function AppHeader() {
                 href={item.href}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                  pathname === item.href ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'text-sidebar-foreground'
+                  (pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard' && item.href !== '/'))
+                     ? 'bg-sidebar-primary text-sidebar-primary-foreground' : 'text-sidebar-foreground'
                 )}
               >
                 <item.icon className="h-4 w-4" />

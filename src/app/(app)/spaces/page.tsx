@@ -10,6 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuthContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +32,13 @@ const mockSpaces: SpaceItem[] = [
 
 export default function SpacesPage() {
   const router = useRouter();
+  const { addActiveRoom } = useAuth();
   // TODO: Add search/filter state and logic
+
+  const handleEnterArena = (space: SpaceItem) => {
+    addActiveRoom(space);
+    router.push(`/arena/${space.id}`);
+  };
 
   return (
     <div className="space-y-8">
@@ -67,7 +74,7 @@ export default function SpacesPage() {
               <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
                 <div className="flex items-center gap-1">
                   <Users className="h-3.5 w-3.5" />
-                  <span>{space.participantCount} participants</span>
+                  <span>{space.participantCount} capacity</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {space.isPublic ? <Globe className="h-3.5 w-3.5 text-green-500" /> : <Lock className="h-3.5 w-3.5 text-red-500" />}
@@ -84,15 +91,15 @@ export default function SpacesPage() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Confirm Action</AlertDialogTitle>
+                    <AlertDialogTitle>Confirm Entry</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to create a room and enter the arena for "{space.name}"?
+                      Are you sure you want to create/join a room and enter the arena for "{space.name}"?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => router.push(`/arena/${space.id}`)}>
-                      Yes, Create Room
+                    <AlertDialogAction onClick={() => handleEnterArena(space)}>
+                      Yes, Enter Arena
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

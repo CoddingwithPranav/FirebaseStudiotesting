@@ -21,7 +21,7 @@ export interface SpaceItem {
   name: string;
   description: string;
   imageUrl: string;
-  participantCount: number;
+  participantCount: number; // Original participant capacity or general interest count
   isPublic: boolean;
 }
 
@@ -36,10 +36,10 @@ export interface NavItem {
 
 // Represents an active session in a space
 export interface ActiveRoom {
-  roomId: string; // Could be spaceId or a unique room instance ID
+  roomId: string; // Using spaceId as roomId for simplicity
   spaceId: string;
   spaceName: string;
+  spaceImageUrl?: string; // Added for display on room card
   lastActivity: number; // Timestamp
-  activeUserIds: string[]; // IDs of users currently in this room
-  // Potentially add spaceImageUrl for display
+  currentPlayers: number; // Mock number of current players
 }

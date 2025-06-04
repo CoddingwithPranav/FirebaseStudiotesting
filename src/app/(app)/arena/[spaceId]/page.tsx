@@ -4,30 +4,25 @@
 import { useParams } from 'next/navigation';
 import PageHeader from '@/components/shared/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useEffect } from 'react';
-import { Gamepad } from 'lucide-react'; // Example icon
-
-// This is still needed if you fetch from mockSpaces, otherwise remove if not used.
-// import type { SpaceItem } from '@/types'; 
-// const mockSpaces: SpaceItem[] = [ 
-//   { id: '1', name: 'Pixel Art Cafe', description: 'A cozy virtual cafe...', imageUrl: '...', participantCount: 42, isPublic: true },
-//   { id: '2', name: 'Developers Den (Private)', description: 'A private workspace...', imageUrl: '...', participantCount: 8, isPublic: false },
-//   { id: '3', name: 'Synthwave Sunset Club', description: 'Dance the night away...', imageUrl: '...', participantCount: 120, isPublic: true },
-//   { id: '4', name: 'Zen Meditation Garden', description: 'Find your inner peace...', imageUrl: '...', participantCount: 15, isPublic: true },
-// ];
+import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { Gamepad, Link2 as CopyLinkIcon } from 'lucide-react'; 
+import { useToast } from '@/hooks/use-toast';
 
 
 export default function ArenaPage() {
   const params = useParams();
   const spaceId = params.spaceId as string;
+  const { toast } = useToast();
+  const [currentUrl, setCurrentUrl] = useState('');
 
-  // Placeholder for fetching space details if needed. For now, construct a name.
-  // const currentSpace = mockSpaces.find(space => space.id === spaceId);
-  // const spaceName = currentSpace?.name || `Arena ${spaceId}`;
-  // const spaceDescription = currentSpace?.description || `Engage in the 2D metaverse experience.`;
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentUrl(window.location.href);
+    }
+  }, []);
   
-  // Simplified version without fetching full space details for this example
-  const spaceName = `Arena ${spaceId}`;
+  const spaceName = `Arena ${spaceId}`; // Simplified for now
   const spaceDescription = `Engage in the 2D metaverse experience for Space ID: ${spaceId}.`;
 
 
@@ -36,17 +31,15 @@ export default function ArenaPage() {
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Clear canvas
-        ctx.fillStyle = 'hsl(var(--muted))'; // Use theme color for background
+        ctx.fillStyle = 'hsl(var(--muted))'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw some placeholder graphics
         ctx.fillStyle = 'hsl(var(--primary))';
-        ctx.fillRect(50, 50, 100, 100); // Player 1
+        ctx.fillRect(50, 50, 100, 100); 
         
         ctx.fillStyle = 'hsl(var(--accent))';
         ctx.beginPath();
-        ctx.arc(canvas.width - 100, canvas.height - 100, 40, 0, Math.PI * 2); // Player 2 / Objective
+        ctx.arc(canvas.width - 100, canvas.height - 100, 40, 0, Math.PI * 2); 
         ctx.fill();
 
         ctx.font = 'bold 24px "Space Grotesk", sans-serif';
@@ -57,11 +50,32 @@ export default function ArenaPage() {
         ctx.fillText('Your 2D Metaverse Game Starts Here!', canvas.width / 2, canvas.height / 2);
       }
     }
-  }, [spaceId]); // Rerun effect if spaceId changes
+  }, [spaceId]); 
+
+  const handleCopyLink = async () => {
+    if (!currentUrl) return;
+    try {
+      await navigator.clipboard.writeText(currentUrl);
+      toast({
+        title: "Link Copied!",
+        description: "Arena link copied to clipboard.",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to Copy",
+        description: "Could not copy link to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <div className="flex flex-col items-stretch space-y-8"> {/* items-stretch for full width cards */}
-      <PageHeader title={spaceName} description={spaceDescription} />
+    <div className="flex flex-col items-stretch space-y-8"> 
+      <PageHeader title={spaceName} description={spaceDescription}>
+        <Button onClick={handleCopyLink} variant="outline" disabled={!currentUrl}>
+            <CopyLinkIcon className="mr-2 h-4 w-4"/> Copy Arena Link
+        </Button>
+      </PageHeader>
 
       <Card className="w-full shadow-lg">
         <CardHeader>
@@ -75,7 +89,7 @@ export default function ArenaPage() {
           <canvas 
             id="game-canvas" 
             width="800" 
-            height="450" // 16:9 aspect ratio
+            height="450" 
             className="border border-border rounded-lg shadow-inner bg-muted"
             data-ai-hint="2d game screen"
           ></canvas>
@@ -100,4 +114,3 @@ export default function ArenaPage() {
     </div>
   );
 }
-
