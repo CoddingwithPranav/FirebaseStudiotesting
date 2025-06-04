@@ -1,3 +1,4 @@
+
 "use client";
 
 import PageHeader from '@/components/shared/PageHeader';
@@ -8,6 +9,18 @@ import { PlusCircle, Users, Lock, Globe, ArrowRight, Search } from 'lucide-react
 import Image from 'next/image';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const mockSpaces: SpaceItem[] = [
   { id: '1', name: 'Pixel Art Cafe', description: 'A cozy virtual cafe for pixel art enthusiasts to hang out and share creations.', imageUrl: 'https://placehold.co/600x400.png', participantCount: 42, isPublic: true },
@@ -17,6 +30,7 @@ const mockSpaces: SpaceItem[] = [
 ];
 
 export default function SpacesPage() {
+  const router = useRouter();
   // TODO: Add search/filter state and logic
 
   return (
@@ -62,11 +76,27 @@ export default function SpacesPage() {
               </div>
             </CardContent>
             <CardFooter className="p-4 border-t border-border">
-              <Link href={`/spaces/${space.id}`} className="w-full">
-                <Button variant="default" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                  Join Space <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="default" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+                    Enter Arena <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Action</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to create a room and enter the arena for "{space.name}"?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => router.push(`/arena/${space.id}`)}>
+                      Yes, Create Room
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardFooter>
           </Card>
         ))}
