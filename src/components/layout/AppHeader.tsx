@@ -1,10 +1,11 @@
+
 "use client";
 
 import Link from 'next/link';
 import Logo from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, UserCircle, LogOut, LayoutDashboard, Map, Gamepad2, ShieldCheck, Home } from 'lucide-react';
+import { Menu, UserCircle, LogOut, LayoutDashboard, Map, Gamepad2, ShieldCheck, Home, Users2, MessageSquare, DoorOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuthContext';
 import { usePathname } from 'next/navigation';
 import { NavItem } from '@/types';
@@ -14,22 +15,40 @@ const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresAuth: true },
   { href: '/maps', label: 'Maps', icon: Map, requiresAuth: true },
   { href: '/spaces', label: 'Spaces', icon: Gamepad2, requiresAuth: true },
+  // { href: '/rooms', label: 'Active Rooms', icon: DoorOpen, requiresAuth: true }, // Will add in next step
+  { href: '/friends', label: 'Friends', icon: Users2, requiresAuth: true },
+  { href: '/chat', label: 'Chat', icon: MessageSquare, requiresAuth: true },
   { href: '/profile', label: 'Profile', icon: UserCircle, requiresAuth: true },
   { href: '/admin', label: 'Admin Panel', icon: ShieldCheck, adminOnly: true, requiresAuth: true },
 ];
 
 
 export default function AppHeader() {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const pathname = usePathname();
 
   const filteredNavItems = navItems.filter(item => {
+    if (!item.requiresAuth && user) return false;
+    if (item.requiresAuth && !user) return false;
     if (item.adminOnly && user?.role !== 'admin') {
       return false;
     }
     return true;
   });
   
+  const getPageTitle = () => {
+    const currentNavItem = navItems.find(item => pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard' ));
+    if (currentNavItem) return currentNavItem.label;
+    // Fallback for dynamic routes like /arena/[spaceId]
+    if (pathname.startsWith('/arena/')) return 'Arena';
+    if (pathname.startsWith('/maps/')) return 'Map Details'; // Assuming map details page might exist
+
+    // Default or more complex logic for other paths
+    const pathParts = pathname.split('/').filter(Boolean);
+    const lastPart = pathParts.pop()?.replace('-', ' ');
+    return lastPart ? lastPart.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Page';
+  }
+
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-md px-4 md:px-6 md:hidden">
       <Sheet>
@@ -59,7 +78,7 @@ export default function AppHeader() {
             ))}
           </nav>
            <div className="mt-auto p-4 border-t border-sidebar-border">
-            {user && (
+            {user && !isLoading && (
               <div className="flex items-center gap-2 mb-4">
                 {user.avatarUrl ? (
                     <img src={user.avatarUrl} alt={user.nickname || "User"} className="h-10 w-10 rounded-full object-cover border-2 border-primary" />
@@ -72,23 +91,32 @@ export default function AppHeader() {
                 </div>
               </div>
             )}
-            <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground" onClick={logout}>
-              <LogOut className="h-5 w-5" />
-              Logout
-            </Button>
-            <Link href="/" passHref>
-              <Button variant="ghost" className="w-full justify-start gap-3 mt-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
-                  <Home className="h-5 w-5" />
-                  Back to Home
+            {user && !isLoading ? (
+              <>
+              <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground" onClick={logout}>
+                <LogOut className="h-5 w-5" />
+                Logout
               </Button>
-            </Link>
+              <Link href="/" passHref>
+                <Button variant="ghost" className="w-full justify-start gap-3 mt-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
+                    <Home className="h-5 w-5" />
+                    Back to Home
+                </Button>
+              </Link>
+              </>
+            ) : !isLoading && (
+              <Link href="/login" passHref>
+                 <Button variant="outline" className="w-full">Login</Button>
+              </Link>
+            )}
+            {isLoading && <div className="h-10 bg-muted/50 animate-pulse rounded-md"></div>}
           </div>
         </SheetContent>
       </Sheet>
       <div className="flex-1">
-        <span className="text-lg font-semibold">{pathname.split('/').pop()?.replace('-', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'Dashboard'}</span>
+        <span className="text-lg font-semibold">{getPageTitle()}</span>
       </div>
-      {user && (
+      {user && !isLoading && (
          <Link href="/profile" className="md:hidden">
             {user.avatarUrl ? (
                 <img src={user.avatarUrl} alt={user.nickname || "User"} className="h-8 w-8 rounded-full object-cover border border-primary" />

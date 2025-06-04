@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -17,13 +18,19 @@ import {
   LogOut,
   ShieldCheck,
   Gamepad2,
-  Home
+  Home,
+  Users2, // Added for Friends
+  MessageSquare, // Added for Chat
+  DoorOpen, // Placeholder for Rooms
 } from 'lucide-react';
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresAuth: true },
   { href: '/maps', label: 'Maps', icon: Map, requiresAuth: true },
   { href: '/spaces', label: 'Spaces', icon: Gamepad2, requiresAuth: true },
+  // { href: '/rooms', label: 'Active Rooms', icon: DoorOpen, requiresAuth: true }, // Will add in next step
+  { href: '/friends', label: 'Friends', icon: Users2, requiresAuth: true },
+  { href: '/chat', label: 'Chat', icon: MessageSquare, requiresAuth: true },
   { href: '/profile', label: 'Profile', icon: UserCircle, requiresAuth: true },
   { href: '/admin', label: 'Admin Panel', icon: ShieldCheck, adminOnly: true, requiresAuth: true },
 ];
@@ -34,6 +41,8 @@ export default function AppSidebar() {
   const { user, logout } = useAuth();
 
   const filteredNavItems = navItems.filter(item => {
+    if (!item.requiresAuth && user) return false; // Hide if logged in for items like login/signup
+    if (item.requiresAuth && !user) return false; // Hide if not logged in for protected items
     if (item.adminOnly && user?.role !== 'admin') {
       return false;
     }
@@ -78,16 +87,24 @@ export default function AppSidebar() {
             </div>
            </div>
         )}
-        <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground" onClick={logout}>
-          <LogOut className="h-5 w-5" />
-          Logout
-        </Button>
-        <Link href="/" passHref>
-            <Button variant="ghost" className="w-full justify-start gap-3 mt-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
-                <Home className="h-5 w-5" />
-                Back to Home
+        {user ? (
+          <>
+            <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground" onClick={logout}>
+              <LogOut className="h-5 w-5" />
+              Logout
             </Button>
-        </Link>
+            <Link href="/" passHref>
+                <Button variant="ghost" className="w-full justify-start gap-3 mt-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground">
+                    <Home className="h-5 w-5" />
+                    Back to Home
+                </Button>
+            </Link>
+          </>
+        ) : (
+          <Link href="/login" passHref>
+            <Button variant="outline" className="w-full">Login</Button>
+          </Link>
+        )}
       </div>
     </aside>
   );
