@@ -4,75 +4,96 @@
 
 @layer base {
   :root {
-    --background: 0 0% 13.3%; /* #222222 */
-    --foreground: 0 0% 95%; /* Lighter for better contrast on dark BG */
-    --card: 0 0% 16.5%; /* #2A2A2A */
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 10%; /* Darker for popovers */
-    --popover-foreground: 0 0% 95%;
-    --primary: 115 100% 34.3%; /* #0FB000 */
-    --primary-foreground: 0 0% 100%; /* #FFFFFF */
-    --secondary: 0 0% 20%; /* #333333 */
-    --secondary-foreground: 0 0% 90%;
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 60%; /* #999999 */
-    --accent: 280 77.5% 52.5%; /* #A729E2 */
-    --accent-foreground: 0 0% 100%; /* #FFFFFF */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 22.7%; /* #3A3A3A */
-    --input: 0 0% 22.7%; /* #3A3A3A */
-    --ring: 115 100% 34.3%; /* Primary color for rings */
-    --chart-1: 115 100% 34.3%;
-    --chart-2: 280 77.5% 52.5%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --background: 0 0% 0%; /* Black #000000 */
+    --foreground: 0 0% 95%; /* Light Gray #F2F2F2 */
+
+    --card: 0 0% 5%; /* Dark Gray #0D0D0D */
+    --card-foreground: 0 0% 95%; /* Light Gray #F2F2F2 */
+
+    --popover: 0 0% 4%; /* Slightly Darker Gray #0A0A0A */
+    --popover-foreground: 0 0% 95%; /* Light Gray #F2F2F2 */
+
+    --primary: 0 100% 50%; /* Deep Red #FF0000 */
+    --primary-foreground: 0 0% 100%; /* White #FFFFFF */
+
+    --secondary: 0 99% 29.4%; /* Dark Red #950101 */
+    --secondary-foreground: 0 0% 90%; /* Lighter Gray #E6E6E6 */
+
+    --muted: 0 0% 10%; /* Darker than card #1A1A1A */
+    --muted-foreground: 0 0% 50%; /* Mid Gray #808080 */
+
+    --accent: 0 100% 11.8%; /* Very Dark Red #3D0000 */
+    --accent-foreground: 0 0% 90%; /* Lighter Gray #E6E6E6 */
+
+    --destructive: 0 100% 50%; /* Deep Red #FF0000 */
+    --destructive-foreground: 0 0% 100%; /* White #FFFFFF */
+
+    --border: 0 0% 15%; /* Visible on card bg #262626 */
+    --input: 0 0% 15%; /* #262626 */
+    --ring: 0 100% 50%; /* Primary Red #FF0000 */
+
+    --chart-1: 0 100% 50%; /* Primary Red */
+    --chart-2: 0 99% 29.4%; /* Secondary Red */
+    --chart-3: 0 100% 11.8%; /* Accent Red */
+    --chart-4: 0 75% 65%; /* Lighter Red #D95353 */
+    --chart-5: 0 50% 75%; /* Even Lighter Red #DFAFAF */
     --radius: 0.5rem;
 
-    /* Sidebar specific vars, ensure they fit the dark theme */
-    --sidebar-background: 0 0% 10%; /* Darker than main BG, e.g. #1A1A1A */
-    --sidebar-foreground: 0 0% 85%; 
-    --sidebar-primary: 115 100% 34.3%; /* Green */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 280 77.5% 52.5%; /* Purple */
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 18%; /* Slightly lighter than sidebar bg */
-    --sidebar-ring: 115 100% 34.3%; /* Green for ring */
+    /* Sidebar specific vars */
+    --sidebar-background: 0 0% 3%; /* #080808 */
+    --sidebar-foreground: 0 0% 85%; /* #D9D9D9 */
+    --sidebar-primary: 0 100% 50%; /* Primary Red */
+    --sidebar-primary-foreground: 0 0% 100%; /* White */
+    --sidebar-accent: 0 100% 11.8%; /* Accent Red */
+    --sidebar-accent-foreground: 0 0% 90%; /* Lighter Gray */
+    --sidebar-border: 0 0% 8%; /* #141414 */
+    --sidebar-ring: 0 100% 50%; /* Primary Red */
   }
 
-  /* Remove .dark class specific overrides if dark is the only theme */
-  /* Or, if you want to keep the structure but make dark default: */
   .dark {
-    --background: 0 0% 13.3%;
-    --foreground: 0 0% 95%;
-    --card: 0 0% 16.5%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 115 100% 34.3%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 90%;
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 280 77.5% 52.5%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 22.7%;
-    --input: 0 0% 22.7%;
-    --ring: 115 100% 34.3%;
-    --chart-1: 115 100% 34.3%;
-    --chart-2: 280 77.5% 52.5%;
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 85%;
-    --sidebar-primary: 115 100% 34.3%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 280 77.5% 52.5%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 115 100% 34.3%;
+    --background: 0 0% 0%; /* Black #000000 */
+    --foreground: 0 0% 95%; /* Light Gray #F2F2F2 */
+
+    --card: 0 0% 5%; /* Dark Gray #0D0D0D */
+    --card-foreground: 0 0% 95%; /* Light Gray #F2F2F2 */
+
+    --popover: 0 0% 4%; /* Slightly Darker Gray #0A0A0A */
+    --popover-foreground: 0 0% 95%; /* Light Gray #F2F2F2 */
+
+    --primary: 0 100% 50%; /* Deep Red #FF0000 */
+    --primary-foreground: 0 0% 100%; /* White #FFFFFF */
+
+    --secondary: 0 99% 29.4%; /* Dark Red #950101 */
+    --secondary-foreground: 0 0% 90%; /* Lighter Gray #E6E6E6 */
+
+    --muted: 0 0% 10%; /* Darker than card #1A1A1A */
+    --muted-foreground: 0 0% 50%; /* Mid Gray #808080 */
+
+    --accent: 0 100% 11.8%; /* Very Dark Red #3D0000 */
+    --accent-foreground: 0 0% 90%; /* Lighter Gray #E6E6E6 */
+
+    --destructive: 0 100% 50%; /* Deep Red #FF0000 */
+    --destructive-foreground: 0 0% 100%; /* White #FFFFFF */
+
+    --border: 0 0% 15%; /* Visible on card bg #262626 */
+    --input: 0 0% 15%; /* #262626 */
+    --ring: 0 100% 50%; /* Primary Red #FF0000 */
+
+    --chart-1: 0 100% 50%; /* Primary Red */
+    --chart-2: 0 99% 29.4%; /* Secondary Red */
+    --chart-3: 0 100% 11.8%; /* Accent Red */
+    --chart-4: 0 75% 65%; /* Lighter Red #D95353 */
+    --chart-5: 0 50% 75%; /* Even Lighter Red #DFAFAF */
+    
+    /* Sidebar specific vars */
+    --sidebar-background: 0 0% 3%; /* #080808 */
+    --sidebar-foreground: 0 0% 85%; /* #D9D9D9 */
+    --sidebar-primary: 0 100% 50%; /* Primary Red */
+    --sidebar-primary-foreground: 0 0% 100%; /* White */
+    --sidebar-accent: 0 100% 11.8%; /* Accent Red */
+    --sidebar-accent-foreground: 0 0% 90%; /* Lighter Gray */
+    --sidebar-border: 0 0% 8%; /* #141414 */
+    --sidebar-ring: 0 100% 50%; /* Primary Red */
   }
 }
 
@@ -82,7 +103,5 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Apply dark theme by default if it's the only theme */
-    /* If you want to rely on system preference or a toggle, manage the .dark class on <html> */
   }
 }
