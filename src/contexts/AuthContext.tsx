@@ -2,20 +2,10 @@
 "use client";
 
 import type { User, SpaceItem, ActiveRoom } from '@/types';
-import React, { createContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import React, { createContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock a list of all users in the system for search functionality
-const mockAllUsers: User[] = [
-  { id: '1', email: 'user@example.com', nickname: 'MetaUser', avatarUrl: `https://placehold.co/100x100.png?text=M`, role: 'user', friendIds: ['2', '3'] },
-  { id: '2', email: 'friend.alpha@example.com', nickname: 'FriendAlpha', avatarUrl: `https://placehold.co/100x100.png?text=F`, role: 'user', friendIds: ['1'] },
-  { id: '3', email: 'beta.user@example.com', nickname: 'BetaUser', avatarUrl: `https://placehold.co/100x100.png?text=B`, role: 'user', friendIds: ['1', '4'] },
-  { id: '4', email: 'gamma.explorer@example.com', nickname: 'GammaExplorer', avatarUrl: `https://placehold.co/100x100.png?text=G`, role: 'user', friendIds: ['3'] },
-  { id: '5', email: 'delta.creator@example.com', nickname: 'DeltaCreator', avatarUrl: `https://placehold.co/100x100.png?text=D`, role: 'user', friendIds: [] },
-  { id: 'admin', email: 'admin@example.com', nickname: 'AdminBoss', avatarUrl: `https://placehold.co/100x100.png?text=A`, role: 'admin', friendIds: ['1'] },
-];
-
+import * as authService from '@/services/authService'; // Import the new service
 
 interface AuthContextType {
   user: User | null;
@@ -39,113 +29,130 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeRooms, setActiveRooms] = useState<ActiveRoom[]>([]);
+  const [_searchableUsers, _setSearchableUsers] = useState<User[]>([]);
+  const [_friends, _setFriends] = useState<User[]>([]);
+  
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('metaverse-user');
-        if (storedUser) {
-          const parsedUser: User = JSON.parse(storedUser);
-          if (!parsedUser.friendIds) {
-            parsedUser.friendIds = [];
-          }
-          setUser(parsedUser);
-        }
-        const storedRooms = localStorage.getItem(ACTIVE_ROOMS_STORAGE_KEY);
-        if (storedRooms) {
-          setActiveRooms(JSON.parse(storedRooms));
-        }
-      } catch (error) {
-        console.error("Failed to parse data from localStorage", error);
-        localStorage.removeItem('metaverse-user');
-        localStorage.removeItem(ACTIVE_ROOMS_STORAGE_KEY);
+  const loadInitialData = useCallback(async () => {
+    setIsLoading(true);
+    const storedUser = authService.getStoredUser();
+    if (storedUser) {
+      setUser(storedUser);
+      // Fetch friends and searchable users based on storedUser
+      if (storedUser.friendIds && storedUser.friendIds.length > 0) {
+        const friendDetails = await authService.getUsersByIds(storedUser.friendIds);
+        _setFriends(friendDetails);
+      } else {
+        _setFriends([]);
       }
-      setIsLoading(false);
-    };
-    checkAuth();
+      const allUsers = await authService.getAllSearchableUsers(storedUser.id);
+      _setSearchableUsers(allUsers.filter(u => !storedUser.friendIds?.includes(u.id)));
+    } else {
+      // No stored user, fetch all users for potential display (e.g. on friends page if not logged in)
+      const allUsers = await authService.getAllSearchableUsers();
+      _setSearchableUsers(allUsers);
+       _setFriends([]);
+    }
+
+    try {
+      const storedRooms = localStorage.getItem(ACTIVE_ROOMS_STORAGE_KEY);
+      if (storedRooms) {
+        setActiveRooms(JSON.parse(storedRooms));
+      }
+    } catch (error) {
+      console.error("Failed to parse active rooms from localStorage", error);
+      localStorage.removeItem(ACTIVE_ROOMS_STORAGE_KEY);
+    }
+    setIsLoading(false);
   }, []);
+
+
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
 
   useEffect(() => {
     if (!isLoading && !user && !['/login', '/signup', '/'].includes(pathname) && !pathname.startsWith('/_next/')) {
-       // router.push('/login');
+       // router.push('/login'); // Commented out for easier development
     }
   }, [user, isLoading, pathname, router]);
 
 
   const login = async (email: string, pass: string) => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    let foundUser = mockAllUsers.find(u => u.email === email);
-    
-    if (!foundUser) { 
-        foundUser = {
-            id: String(Date.now()), 
-            email,
-            nickname: email.split('@')[0] || 'NewUser',
-            avatarUrl: `https://placehold.co/100x100.png?text=${(email[0] || 'N').toUpperCase()}`,
-            role: email.includes('admin') ? 'admin' : 'user',
-            friendIds: [],
-        };
-    } else {
-       if (!foundUser.friendIds) {
-            foundUser.friendIds = [];
-        }
+    try {
+      const loggedInUser = await authService.loginUser(email, pass);
+      setUser(loggedInUser);
+      // Refresh friends and searchable users
+      if (loggedInUser.friendIds && loggedInUser.friendIds.length > 0) {
+        const friendDetails = await authService.getUsersByIds(loggedInUser.friendIds);
+        _setFriends(friendDetails);
+      } else {
+         _setFriends([]);
+      }
+      const allUsers = await authService.getAllSearchableUsers(loggedInUser.id);
+      _setSearchableUsers(allUsers.filter(u => !loggedInUser.friendIds?.includes(u.id)));
+      
+      router.push('/dashboard');
+    } catch (error) {
+      toast({ title: "Login Failed", description: (error as Error).message || "Please check your credentials.", variant: "destructive" });
+      throw error; // Re-throw to be caught by form
+    } finally {
+      setIsLoading(false);
     }
-    
-    setUser(foundUser);
-    localStorage.setItem('metaverse-user', JSON.stringify(foundUser));
-    setIsLoading(false);
-    router.push('/dashboard');
   };
 
   const signup = async (email: string, pass: string, nickname: string) => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const newUser: User = {
-      id: String(Date.now()), 
-      email,
-      nickname,
-      avatarUrl: `https://placehold.co/100x100.png?text=${(nickname[0] || 'S').toUpperCase()}`,
-      role: 'user',
-      friendIds: [],
-    };
-    setUser(newUser);
-    localStorage.setItem('metaverse-user', JSON.stringify(newUser));
-    setIsLoading(false);
-    router.push('/dashboard');
+    try {
+      const newUser = await authService.signupUser(email, pass, nickname);
+      setUser(newUser);
+      _setFriends([]); // New user has no friends initially
+      const allUsers = await authService.getAllSearchableUsers(newUser.id);
+      _setSearchableUsers(allUsers); // All other users are searchable
+      router.push('/dashboard');
+    } catch (error) {
+      toast({ title: "Signup Failed", description: (error as Error).message || "Could not create account.", variant: "destructive" });
+      throw error; // Re-throw to be caught by form
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setUser(null);
-    localStorage.removeItem('metaverse-user');
-    // Optionally clear active rooms on logout, or leave them if they are not user-specific
-    // localStorage.removeItem(ACTIVE_ROOMS_STORAGE_KEY); 
-    // setActiveRooms([]);
-    setIsLoading(false);
-    router.push('/login');
+    try {
+      await authService.logoutUser();
+      setUser(null);
+      _setFriends([]);
+      const allUsers = await authService.getAllSearchableUsers(); // Refresh searchable users for non-logged-in state
+      _setSearchableUsers(allUsers);
+      router.push('/login');
+    } catch (error) {
+      toast({ title: "Logout Failed", description: (error as Error).message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const updateProfile = async (nickname: string, avatarFile?: File) => {
-    if (!user) return;
+    if (!user) throw new Error("User not authenticated");
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    let newAvatarUrl = user.avatarUrl;
-    if (avatarFile) {
-      newAvatarUrl = URL.createObjectURL(avatarFile);
+    try {
+      const updatedUser = await authService.updateUserProfile(user, nickname, avatarFile);
+      setUser(updatedUser);
+      // If user's own details changed, friends list appearance might need update if friend cards show avatar etc.
+      // No direct change to _friends or _searchableUsers lists themselves unless nickname change affects sorting/filtering.
+      toast({ title: "Profile Updated", description: "Your changes have been saved." });
+    } catch (error) {
+      toast({ title: "Update Failed", description: (error as Error).message || "Could not update profile.", variant: "destructive" });
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
-
-    const updatedUser = { ...user, nickname, avatarUrl: newAvatarUrl };
-    setUser(updatedUser);
-    localStorage.setItem('metaverse-user', JSON.stringify(updatedUser));
-    setIsLoading(false);
-    toast({ title: "Profile Updated", description: "Your changes have been saved." });
   };
 
   const addFriend = async (friendId: string) => {
@@ -162,62 +169,80 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const updatedUser: User = {
-      ...user,
-      friendIds: [...(user.friendIds || []), friendId],
-    };
-    setUser(updatedUser);
-    localStorage.setItem('metaverse-user', JSON.stringify(updatedUser));
-    toast({ title: "Friend Added!", description: `${mockAllUsers.find(u=>u.id === friendId)?.nickname || 'User'} is now your friend.` });
+    setIsLoading(true);
+    const updatedFriendIds = [...(user.friendIds || []), friendId];
+    const updatedUser: User = { ...user, friendIds: updatedFriendIds };
+    
+    try {
+      // In a real app, this would be an API call to update the user's friends list on the backend.
+      // Here, we'll simulate by updating the user in authService (which updates localStorage).
+      await authService.updateUserProfile(updatedUser, updatedUser.nickname || '', undefined); // Simulating save
+      setUser(updatedUser);
+
+      // Update local friends and searchable users lists
+      const newFriendDetails = await authService.getUsersByIds([friendId]);
+      if (newFriendDetails.length > 0) {
+        _setFriends(prevFriends => [...prevFriends, newFriendDetails[0]]);
+      }
+      _setSearchableUsers(prevSearchable => prevSearchable.filter(u => u.id !== friendId));
+      
+      const friendInfo = (await authService.getUsersByIds([friendId]))[0];
+      toast({ title: "Friend Added!", description: `${friendInfo?.nickname || 'User'} is now your friend.` });
+    } catch (error) {
+       toast({ title: "Failed to Add Friend", description: (error as Error).message, variant: "destructive" });
+    } finally {
+        setIsLoading(false);
+    }
   };
   
-  const friends = useMemo(() => {
-    if (!user || !user.friendIds) return [];
-    return mockAllUsers.filter(u => user.friendIds!.includes(u.id));
-  }, [user]);
-
-  const searchableUsers = useMemo(() => {
-    if (!user) return mockAllUsers.filter(u => u.id !== 'admin'); 
-    return mockAllUsers.filter(u => u.id !== user.id && !user.friendIds?.includes(u.id));
-  }, [user]);
-
   const addActiveRoom = (space: SpaceItem) => {
     setActiveRooms(prevRooms => {
       const existingRoomIndex = prevRooms.findIndex(room => room.spaceId === space.id);
       const newRoom: ActiveRoom = {
-        roomId: space.id,
+        roomId: space.id, // Using spaceId as roomId
         spaceId: space.id,
         spaceName: space.name,
         spaceImageUrl: space.imageUrl,
         lastActivity: Date.now(),
-        currentPlayers: Math.floor(Math.random() * (space.participantCount / 2)) + 1, // Mock players
+        currentPlayers: Math.floor(Math.random() * (space.participantCount / 2)) + 1,
       };
 
       let updatedRooms;
       if (existingRoomIndex > -1) {
-        // Update existing room's activity and player count
         updatedRooms = [...prevRooms];
         updatedRooms[existingRoomIndex] = {
           ...updatedRooms[existingRoomIndex],
           lastActivity: newRoom.lastActivity,
-          currentPlayers: newRoom.currentPlayers, // Re-roll players or implement smarter logic
+          currentPlayers: newRoom.currentPlayers,
         };
       } else {
-        // Add new room
         updatedRooms = [newRoom, ...prevRooms];
       }
       
-      // Sort by last activity, newest first
       updatedRooms.sort((a, b) => b.lastActivity - a.lastActivity);
-      // Limit number of rooms shown e.g. to 10
       const limitedRooms = updatedRooms.slice(0, 10); 
       localStorage.setItem(ACTIVE_ROOMS_STORAGE_KEY, JSON.stringify(limitedRooms));
       return limitedRooms;
     });
   };
 
+  const contextValue = useMemo(() => ({
+    user,
+    isLoading,
+    login,
+    signup,
+    logout,
+    updateProfile,
+    addFriend,
+    friends: _friends,
+    searchableUsers: _searchableUsers,
+    activeRooms,
+    addActiveRoom
+  }), [user, isLoading, login, signup, logout, updateProfile, addFriend, _friends, _searchableUsers, activeRooms, addActiveRoom]);
+
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout, updateProfile, addFriend, friends, searchableUsers, activeRooms, addActiveRoom }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
