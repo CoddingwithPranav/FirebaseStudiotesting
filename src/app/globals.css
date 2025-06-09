@@ -22,7 +22,7 @@
     --muted: 0 0% 10%; /* Darker than card #1A1A1A */
     --muted-foreground: 0 0% 50%; /* Mid Gray #808080 */
 
-    --accent: 0 100% 11.8%; /* Very Dark Red #3D0000 */
+    --accent: 0 100% 18.4%; /* Very Dark Red #5E0000 */
     --accent-foreground: 0 0% 90%; /* Lighter Gray #E6E6E6 */
 
     --destructive: 0 100% 50%; /* Deep Red #FF0000 */
@@ -32,9 +32,9 @@
     --input: 0 0% 15%; /* #262626 */
     --ring: 0 100% 50%; /* Primary Red #FF0000 */
 
-    --chart-1: 0 100% 50%; /* Primary Red */
-    --chart-2: 0 99% 29.4%; /* Secondary Red */
-    --chart-3: 0 100% 11.8%; /* Accent Red */
+    --chart-1: 0 100% 50%; /* Primary Red #FF0000 */
+    --chart-2: 0 99% 29.4%; /* Secondary Red #950101 */
+    --chart-3: 0 100% 18.4%; /* Accent Red #5E0000 */
     --chart-4: 0 75% 65%; /* Lighter Red #D95353 */
     --chart-5: 0 50% 75%; /* Even Lighter Red #DFAFAF */
     --radius: 0.5rem;
@@ -42,12 +42,12 @@
     /* Sidebar specific vars */
     --sidebar-background: 0 0% 3%; /* #080808 */
     --sidebar-foreground: 0 0% 85%; /* #D9D9D9 */
-    --sidebar-primary: 0 100% 50%; /* Primary Red */
-    --sidebar-primary-foreground: 0 0% 100%; /* White */
-    --sidebar-accent: 0 100% 11.8%; /* Accent Red */
-    --sidebar-accent-foreground: 0 0% 90%; /* Lighter Gray */
+    --sidebar-primary: 0 100% 50%; /* Primary Red #FF0000 */
+    --sidebar-primary-foreground: 0 0% 100%; /* White #FFFFFF */
+    --sidebar-accent: 0 100% 18.4%; /* Accent Red #5E0000 */
+    --sidebar-accent-foreground: 0 0% 90%; /* Lighter Gray #E6E6E6 */
     --sidebar-border: 0 0% 8%; /* #141414 */
-    --sidebar-ring: 0 100% 50%; /* Primary Red */
+    --sidebar-ring: 0 100% 50%; /* Primary Red #FF0000 */
   }
 
   .dark {
@@ -69,7 +69,7 @@
     --muted: 0 0% 10%; /* Darker than card #1A1A1A */
     --muted-foreground: 0 0% 50%; /* Mid Gray #808080 */
 
-    --accent: 0 100% 11.8%; /* Very Dark Red #3D0000 */
+    --accent: 0 100% 18.4%; /* Very Dark Red #5E0000 */
     --accent-foreground: 0 0% 90%; /* Lighter Gray #E6E6E6 */
 
     --destructive: 0 100% 50%; /* Deep Red #FF0000 */
@@ -79,21 +79,21 @@
     --input: 0 0% 15%; /* #262626 */
     --ring: 0 100% 50%; /* Primary Red #FF0000 */
 
-    --chart-1: 0 100% 50%; /* Primary Red */
-    --chart-2: 0 99% 29.4%; /* Secondary Red */
-    --chart-3: 0 100% 11.8%; /* Accent Red */
+    --chart-1: 0 100% 50%; /* Primary Red #FF0000 */
+    --chart-2: 0 99% 29.4%; /* Secondary Red #950101 */
+    --chart-3: 0 100% 18.4%; /* Accent Red #5E0000 */
     --chart-4: 0 75% 65%; /* Lighter Red #D95353 */
     --chart-5: 0 50% 75%; /* Even Lighter Red #DFAFAF */
     
     /* Sidebar specific vars */
     --sidebar-background: 0 0% 3%; /* #080808 */
     --sidebar-foreground: 0 0% 85%; /* #D9D9D9 */
-    --sidebar-primary: 0 100% 50%; /* Primary Red */
-    --sidebar-primary-foreground: 0 0% 100%; /* White */
-    --sidebar-accent: 0 100% 11.8%; /* Accent Red */
-    --sidebar-accent-foreground: 0 0% 90%; /* Lighter Gray */
+    --sidebar-primary: 0 100% 50%; /* Primary Red #FF0000 */
+    --sidebar-primary-foreground: 0 0% 100%; /* White #FFFFFF */
+    --sidebar-accent: 0 100% 18.4%; /* Accent Red #5E0000 */
+    --sidebar-accent-foreground: 0 0% 90%; /* Lighter Gray #E6E6E6 */
     --sidebar-border: 0 0% 8%; /* #141414 */
-    --sidebar-ring: 0 100% 50%; /* Primary Red */
+    --sidebar-ring: 0 100% 50%; /* Primary Red #FF0000 */
   }
 }
 
